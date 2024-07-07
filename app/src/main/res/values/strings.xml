@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MyGoalPlanner</string>
+    <string name="update_goal">Update Goal</string>
+    <string name="add_goal">Add Goals</string>
+</resources>
