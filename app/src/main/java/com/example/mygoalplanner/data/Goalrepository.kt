@@ -2,7 +2,7 @@ package com.example.mygoalplanner.data
 
 import kotlinx.coroutines.flow.Flow
 
-class Goalrepository(private val goalDao:GoalDao) {
+class GoalRepository(private val goalDao:GoalDao) {
 
     suspend fun addAGoal(goal:Goal){
         goalDao.addAGoal(goal)
@@ -10,7 +10,7 @@ class Goalrepository(private val goalDao:GoalDao) {
 
     fun getGoals():Flow<List<Goal>> = goalDao.getAllGoals()
 
-    fun getAGoalById(id:Long): Flow<List<Goal>> {
+    fun getAGoalById(id:Long): Flow<Goal> {
         return goalDao.getAGoalById(id)
     }
 

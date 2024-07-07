@@ -25,5 +25,5 @@ abstract class GoalDao {
     abstract suspend fun deleteAGoal(goalEntity:Goal)
 
     @Query("Select * from `goal-table` where id=:id ")
-    abstract  fun getAGoalById(id:Long): Flow<List<Goal>>
+    abstract  fun getAGoalById(id:Long): Flow<Goal>
 }

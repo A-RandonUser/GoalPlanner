@@ -1,7 +1,7 @@
 package com.example.mygoalplanner
 
 
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +14,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.example.mygoalplanner.data.Goal
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditDetailView (
@@ -38,8 +45,20 @@ fun AddEditDetailView (
         viewModel : GoalViewModel,
         navController: NavController
 ){
+    val snackMessage = remember{ mutableStateOf("")}
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val btnBackGroundColor = Color(ContextCompat.getColor(context, R.color.app_bar_color))
+    val scaffoldState = rememberScaffoldState()
+    if (id !=0L){
+        val goal = viewModel.getAGoalById(id).collectAsState(initial =Goal(0L,"",""))
+        viewModel.goalTitleState = goal.value.title
+        viewModel.goalDescriptionState = goal.value.description
+    }else{
+        viewModel.goalTitleState = ""
+        viewModel.goalDescriptionState=""
+    }
+
 
     Scaffold (
         topBar = { AppBarView(tittle =
@@ -47,7 +66,8 @@ fun AddEditDetailView (
             else {stringResource(id = R.string.add_goal)}
                               )
             {navController.navigateUp()}
-                 }
+                 },
+        scaffoldState = scaffoldState,
              )
     {
 
@@ -77,14 +97,38 @@ fun AddEditDetailView (
             Button(onClick = {
                 if(viewModel.goalTitleState.isNotEmpty() && viewModel.goalDescriptionState.isNotEmpty())
                 {
-                    //TODO Update goal
+                    if(id != 0L){
+                        //TODO Update goal
+                        viewModel.updateGoal(
+                            Goal(
+                                id = id,
+                                title = viewModel.goalTitleState.trim(),
+                                description = viewModel.goalDescriptionState.trim()
+                            )
+                        )
+                    }else {
+                        //TODO add Wish
+                        viewModel.addGoal(
+                            Goal(
+                                title = viewModel.goalTitleState.trim(),
+                                description = viewModel.goalDescriptionState.trim()
+                                 )
+                                            )
+                        snackMessage.value="Goal Has Been Created"
+                             }
+
                 }else{
-                    //TODO add Wish
-                }
+                        snackMessage.value="Enter fields to create a goal "
+                     }
+                scope.launch {
+                   // scaffoldState.snackbarHostState.showSnackbar(snackMessage.value)
+                    navController.navigateUp()
+                               }
+
                              },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = btnBackGroundColor
-                ),
+                                                    ),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(16.dp)
                 )
@@ -127,8 +171,3 @@ fun GoalTextField(
     )
 }
 
-@Preview
-@Composable
-fun GoalTestFieldPrev(){
-    GoalTextField(label = "text", value = "text", onValueChanged = {})
-}
